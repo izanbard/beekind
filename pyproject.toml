@@ -5,10 +5,12 @@ dependencies = [
     "fastapi>=0.111.0",
     "fastapi-utilities>=0.2.0",
     "uvicorn>=0.29.0",
-    "pydantic>=1.10.9",
     "sqlmodel>=0.0.24",
-    "lxml>=6.0.1",
-    "pytz>=2025.2"
+    "pyjwt>=2.8.0",
+    "pydantic>=2.12.4",
+    "pydantic-settings>=2.12.0",
+    "cryptography>=46.0.3",
+    "httpx>=0.28.1"
 ]
 requires-python = ">=3.12"
 readme = ".github/README.md"
