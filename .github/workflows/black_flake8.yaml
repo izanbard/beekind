@@ -30,4 +30,4 @@ jobs:
         with:
           checkName: 'flake8'   # NOTE: this needs to be the same as the job name
         env:
-          GITHUB_TOKEN: ${{ secrets.IGS_GITHUB_WORKFLOWS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

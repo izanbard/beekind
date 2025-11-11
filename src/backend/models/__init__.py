@@ -6,7 +6,6 @@ engine = None
 
 
 def get_db_engine():
-    global engine
     return engine
 
 
