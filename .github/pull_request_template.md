@@ -1,5 +1,9 @@
 # Title - a short useful way to ID the PR
 
+## References
+
+Add any links to external references here, including any associated issue ticket.
+
 ## Description
 
 A detailed description of the problem you are trying to solve and the approach you took to solving it. This should include
@@ -13,10 +17,6 @@ A description of any associated documentation changes
 ## Further work
 
 A description of any further work identified that is outside the scope of this change. Include links to issues raised.
-
-## References
-
-Add any links to external references here, including any associated issue ticket.
 
 ## Change Log
 

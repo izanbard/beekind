@@ -7,23 +7,25 @@ This project is under dev and not suitable for use of any kind
 
 ## Dev Installation
 
-### Requirements
+### Backend
+
+#### Requirements
 
 * Python3.12
 
-### Prepare
+#### Prepare
 
 It is strongly recommended that you use a separate python environment for this work. These instructions assume the use of venv
 on linux, other envs and OSes are available, and if you prefer them, then please amend the instructions as required:
 
-#### Checkout the code
+##### Checkout the code
 
 ```shell
 $ git clone git@github.com:<<Repo>>
 $ cd <<folder>>
 ```
 
-#### Prepare the venv
+##### Prepare the venv
 
 ```shell
 $ python -m venv venv
@@ -47,7 +49,7 @@ Install the requirements
 (venv) $ pip install -r requirements.txt
 ```
 
-#### Install pre-commit hooks
+##### Install pre-commit hooks
 
 ```shell
 (venv) $ pre-commit install
