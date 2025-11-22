@@ -1,19 +1,35 @@
+from contextlib import asynccontextmanager
 from io import StringIO
+from typing import AsyncIterator
 
 from fastapi import FastAPI, Response, Request, status
 from fastapi.responses import JSONResponse
 from yaml import dump as yaml_dump
 
-from . import get_logger
-from .routers import ResourceRouter
+from src.backend.helpers import get_logger, get_config
+from src.backend.auth import MSAuthAdapter
+from src.backend.routers import ResourceRouter
 
 
-def create_api():
+@asynccontextmanager
+async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]:
+    # before app is created
+    config = get_config()
+    MSAuthAdapter(config.frontend_client_id, config.tenant_id, config.auth_policy, config.auth_url)
+    # yield to the app
+    yield
+    # after the app shuts down
+
+
+def create_api() -> FastAPI:
     app_logger = get_logger()
     with open("version.txt") as f:
-        version = f.readline()
+        version = f.readline().strip()
     tags_metadata = [
-        {"name": "Entities", "description": "CRUD operations for the base data entities"},
+        {"name": "Resources", "description": "CRUD operations for the base data entities"},
+        {"name": "Contacts", "description": "CRUD operations for the base contact entities", "parent": "Resources"},
+        {"name": "Users", "description": "CRUD operations for the base user entities", "parent": "Resources"},
+        {"name": "Organisations", "description": "CRUD operations for the base org entities", "parent": "Resources"},
     ]
     app_logger.info(f"Creating the app... version: {version}")
     app = FastAPI(
@@ -22,7 +38,9 @@ def create_api():
         version=version,
         openapi_tags=tags_metadata,
         external_docs={"description": "Yaml API Spec", "url": "/openapi.yaml"},
+        lifespan=app_lifespan_startup_and_shutdown,
     )
+
     app.include_router(ResourceRouter)
 
     @app.get(
@@ -31,7 +49,7 @@ def create_api():
         response_class=Response,
         include_in_schema=False,
     )
-    async def yaml_spec():
+    async def yaml_spec() -> Response:
         spec_str = StringIO()
         yaml_dump(app.openapi(), spec_str, sort_keys=False)
         return Response(spec_str.getvalue(), media_type="text/yaml")
@@ -41,7 +59,7 @@ def create_api():
     return app
 
 
-def internal_exception_handler(request: Request, exc: Exception):
+def internal_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     content = {
         "code": 500,
         "msg": "Internal Server Error",

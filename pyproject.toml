@@ -10,7 +10,9 @@ dependencies = [
     "pydantic>=2.12.4",
     "pydantic-settings>=2.12.0",
     "cryptography>=46.0.3",
-    "httpx>=0.28.1"
+    "httpx>=0.28.1",
+    "uvloop",
+    "httptools"
 ]
 requires-python = ">=3.12"
 readme = ".github/README.md"

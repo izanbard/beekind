@@ -2,8 +2,7 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from pydantic import computed_field
-from sqlmodel import Field
-from sqlmodel import SQLModel
+from sqlmodel import Field, SQLModel
 
 
 class Contacts(SQLModel, table=True):

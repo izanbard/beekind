@@ -24,7 +24,7 @@ class Config(BaseSettings):
         description="secret for auth between backend fleet controller and api",
     )
 
-    def make_auth_config_js(self):
+    def make_auth_config_js(self) -> str:
         return f"""
 const msalConfig = {{
     auth: {{

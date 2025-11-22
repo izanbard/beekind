@@ -3,15 +3,14 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status, Path, HTTPException
-from sqlalchemy.engine import Engine
 from sqlmodel import Session, select
 
 from src.backend.auth import AuthHelper
-from src.backend.models import Contacts, get_db_engine, ContactsList
+from src.backend.models import Contacts, ContactsList, get_session
 
 ContactRouter = APIRouter(
     dependencies=[Depends(AuthHelper.bearer_token)],
-    tags=["Entities"],
+    tags=["Contacts"],
     prefix="/contacts",
 )
 
@@ -23,9 +22,10 @@ ContactRouter = APIRouter(
     summary="Get list of all all contacts",
     description="Get list of all all contacts",
 )
-async def get_contacts_list(engine: Annotated[Engine, Depends(get_db_engine)]) -> ContactsList | None:
-    with Session(engine) as db:
-        contacts = db.scalars(select(Contacts)).all()
+async def get_contacts_list(
+    db: Annotated[Session, Depends(get_session)],
+) -> ContactsList | None:
+    contacts = db.scalars(select(Contacts)).all()
     return ContactsList(contacts=contacts)
 
 
@@ -38,10 +38,9 @@ async def get_contacts_list(engine: Annotated[Engine, Depends(get_db_engine)]) -
 )
 async def get_contact_by_id(
     contact_id: Annotated[UUID, Path(..., description="Internal ID of a contact", example=str(uuid.uuid4()))],
-    engine: Annotated[Engine, Depends(get_db_engine)],
+    db: Annotated[Session, Depends(get_session)],
 ) -> type[Contacts | None]:
-    with Session(engine) as db:
-        contact = db.get(Contacts, contact_id)
+    contact = db.get(Contacts, contact_id)
     if contact is not None:
         return contact
     raise HTTPException(status_code=404, detail="Contact not found")
@@ -54,13 +53,14 @@ async def get_contact_by_id(
     summary="Create a new contact",
     description="Create a new contact",
 )
-async def create_new_contact(contact: Contacts, engine: Annotated[Engine, Depends(get_db_engine)]) -> Contacts:
-    print(contact.model_dump())
-    with Session(engine) as db:
-        with db.begin():
-            if type(contact.id) is str:
-                contact.id = UUID(str(contact.id))
-            db.merge(contact)
+async def create_new_contact(
+    contact: Contacts,
+    db: Annotated[Session, Depends(get_session)],
+) -> Contacts:
+    with db.begin():
+        if type(contact.id) is str:
+            contact.id = UUID(str(contact.id))
+        db.merge(contact)
     return contact
 
 
@@ -69,12 +69,11 @@ async def create_new_contact(contact: Contacts, engine: Annotated[Engine, Depend
 )
 async def delete_contact_by_id(
     contact_id: Annotated[UUID, Path(..., description="Internal ID of a contact", example=str(uuid.uuid4()))],
-    engine: Annotated[Engine, Depends(get_db_engine)],
+    db: Annotated[Session, Depends(get_session)],
 ) -> None:
-    with Session(engine) as db:
-        with db.begin():
-            contact = db.get(Contacts, contact_id)
-            if contact is None:
-                raise HTTPException(status_code=404, detail="Contact not found")
-            db.delete(contact)
+    with db.begin():
+        contact = db.get(Contacts, contact_id)
+        if contact is None:
+            raise HTTPException(status_code=404, detail="Contact not found")
+        db.delete(contact)
     return None

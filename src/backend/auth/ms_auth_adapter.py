@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from jwt import PyJWTError
 
-from src.backend import get_logger
+from src.backend.helpers import get_logger
 
 logger = get_logger()
 

@@ -1,0 +1,33 @@
+from typing import Annotated
+from uuid import UUID, uuid4
+
+from pydantic import computed_field
+from sqlmodel import SQLModel, Field, Relationship
+
+# from local files
+from .user_to_org_link import UserToOrgLink
+
+
+class Users(SQLModel, table=True):
+    __tablename__ = "users"
+    user_id: UUID = Field(
+        default_factory=uuid4,
+        description="Internal ID of User",
+        schema_extra={"examples": [uuid4().hex]},
+        primary_key=True,
+    )
+    username: str = Field(
+        ...,
+        description="Display name of User",
+        schema_extra={"examples": ["Peter Robinson"]},
+    )
+    orgs: list["Organisations"] = Relationship(back_populates="users", link_model=UserToOrgLink)  # noqa: F821
+
+
+class UsersList(SQLModel):
+    users: list[Users] = Field(description="List of Users objects")
+
+    @computed_field
+    @property
+    def count(self) -> Annotated[int, Field(description="Number of users", schema_extra={"examples": [1]})]:
+        return len(self.users)
