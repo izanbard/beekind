@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, Path, HTTPException
 from sqlmodel import Session, select
 
 from src.backend.auth import AuthHelper
-from src.backend.models import Contacts, ContactsList, get_session
+from src.backend.models import Contacts, ContactsList, get_session, ContactsPublic, ContactsCreate
 
 ContactRouter = APIRouter(
     dependencies=[Depends(AuthHelper.bearer_token)],
@@ -32,7 +32,7 @@ async def get_contacts_list(
 @ContactRouter.get(
     "/{contact_id}",
     status_code=status.HTTP_200_OK,
-    response_model=Contacts | None,
+    response_model=ContactsPublic | None,
     summary="Get a specific contact",
     description="Get a specific contact",
 )
@@ -49,19 +49,19 @@ async def get_contact_by_id(
 @ContactRouter.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=Contacts,
+    response_model=ContactsPublic,
     summary="Create a new contact",
     description="Create a new contact",
 )
 async def create_new_contact(
-    contact: Contacts,
+    contact: ContactsCreate,
     db: Annotated[Session, Depends(get_session)],
 ) -> Contacts:
     with db.begin():
-        if type(contact.id) is str:
-            contact.id = UUID(str(contact.id))
-        db.merge(contact)
-    return contact
+        db_contact = Contacts.model_validate(contact)
+        db.add(db_contact)
+    db.refresh(db_contact)
+    return db_contact
 
 
 @ContactRouter.delete(

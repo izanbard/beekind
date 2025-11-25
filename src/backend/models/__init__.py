@@ -8,12 +8,20 @@ from sqlmodel import create_engine, SQLModel, Session
 from src.backend.helpers import Config, get_config
 
 # from local files
-from .contacts import Contacts, ContactsList  # noqa: F401
-from .organisations import Organisations, OrganisationsList  # noqa: F401
-from .users import Users, UsersList  # noqa: F401
+from .contacts import Contacts, ContactsList, ContactsCreate, ContactsPublic  # noqa: F401
+from .organisations import (  # noqa: F401
+    Organisations,  # noqa: F401
+    OrganisationsList,  # noqa: F401
+    OrganisationsPublic,  # noqa: F401
+    OrganisationsCreate,  # noqa: F401
+    OrganisationsPublicWithUsers,  # noqa: F401
+)  # noqa: F401
+from .users import Users, UsersList, UsersCreate, UsersPublic, UsersPublicWithOrgs  # noqa: F401
 from .user_to_org_link import UserToOrgLink  # noqa: F401
 
 engine = None
+OrganisationsPublicWithUsers.model_rebuild()
+UsersPublicWithOrgs.model_rebuild()
 
 
 def get_db_engine(config: Annotated[Config, Depends(get_config)]) -> Engine:

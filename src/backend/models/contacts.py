@@ -5,15 +5,7 @@ from pydantic import computed_field
 from sqlmodel import Field, SQLModel
 
 
-class Contacts(SQLModel, table=True):
-    __tablename__ = "contacts"
-
-    id: UUID = Field(
-        default_factory=uuid4,
-        description="Internal ID of Contact",
-        schema_extra={"examples": [uuid4().hex]},
-        primary_key=True,
-    )
+class ContactsBase(SQLModel):
     name: str = Field(
         ...,
         description="Name of the Contact",
@@ -45,8 +37,27 @@ class Contacts(SQLModel, table=True):
     )
 
 
+class Contacts(ContactsBase, table=True):
+    __tablename__ = "contacts"
+
+    id: UUID = Field(
+        default_factory=uuid4,
+        description="Internal ID of Contact",
+        schema_extra={"examples": [uuid4().hex]},
+        primary_key=True,
+    )
+
+
+class ContactsCreate(ContactsBase):
+    pass
+
+
+class ContactsPublic(ContactsBase):
+    id: UUID
+
+
 class ContactsList(SQLModel):
-    contacts: list[Contacts] = Field(description="List of Contacts objects")
+    contacts: list[ContactsPublic] = Field(description="List of Contacts objects")
 
     @computed_field
     @property

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, Path, HTTPException
 from sqlmodel import Session, select
 
 from src.backend.auth import AuthHelper
-from src.backend.models import Users, UsersList, Organisations, OrganisationsList, get_session
+from src.backend.models import Users, UsersList, Organisations, get_session, UsersPublic, UsersCreate, UsersPublicWithOrgs
 
 UserRouter = APIRouter(
     dependencies=[Depends(AuthHelper.bearer_token)],
@@ -30,7 +30,7 @@ async def get_users_list(db: Annotated[Session, Depends(get_session)]) -> UsersL
 @UserRouter.get(
     "/{user_id}",
     status_code=status.HTTP_200_OK,
-    response_model=Users | None,
+    response_model=UsersPublicWithOrgs | None,
     summary="Get a specific user",
     description="Get a specific user",
 )
@@ -47,19 +47,19 @@ async def get_user_by_id(
 @UserRouter.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=Users,
+    response_model=UsersPublic,
     summary="Create a new user",
     description="Create a new user",
 )
 async def create_new_user(
-    user: Users,
+    user: UsersCreate,
     db: Annotated[Session, Depends(get_session)],
 ) -> Users:
     with db.begin():
-        if type(user.user_id) is str:
-            user.user_id = UUID(str(user.user_id))
-        db.merge(user)
-    return user
+        db_user = Users.model_validate(user)
+        db.add(db_user)
+    db.refresh(db_user)
+    return db_user
 
 
 @UserRouter.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a user", description="Delete a user")
@@ -78,7 +78,7 @@ async def delete_user_by_id(
 @UserRouter.put(
     "/{user_id}/{org_id}",
     status_code=status.HTTP_200_OK,
-    response_model=OrganisationsList,
+    response_model=UsersPublicWithOrgs,
     summary="Add a user to an org",
     description="Add a user to an org",
 )
@@ -86,7 +86,7 @@ async def add_user_to_org(
     user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example=str(uuid.uuid4()))],
     org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example=str(uuid.uuid4()))],
     db: Annotated[Session, Depends(get_session)],
-) -> OrganisationsList:
+):
     with db.begin():
         user = db.get(Users, user_id)
         if user is None:
@@ -95,4 +95,5 @@ async def add_user_to_org(
         if org is None:
             raise HTTPException(status_code=404, detail="Organisation not found")
         org.users.append(user)
-    return OrganisationsList(orgs=user.orgs)
+    db.refresh(user)
+    return user

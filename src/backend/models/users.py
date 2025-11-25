@@ -8,7 +8,15 @@ from sqlmodel import SQLModel, Field, Relationship
 from .user_to_org_link import UserToOrgLink
 
 
-class Users(SQLModel, table=True):
+class UsersBase(SQLModel):
+    username: str = Field(
+        ...,
+        description="Display name of User",
+        schema_extra={"examples": ["Peter Robinson"]},
+    )
+
+
+class Users(UsersBase, table=True):
     __tablename__ = "users"
     user_id: UUID = Field(
         default_factory=uuid4,
@@ -16,16 +24,24 @@ class Users(SQLModel, table=True):
         schema_extra={"examples": [uuid4().hex]},
         primary_key=True,
     )
-    username: str = Field(
-        ...,
-        description="Display name of User",
-        schema_extra={"examples": ["Peter Robinson"]},
-    )
+
     orgs: list["Organisations"] = Relationship(back_populates="users", link_model=UserToOrgLink)  # noqa: F821
 
 
+class UsersCreate(UsersBase):
+    pass
+
+
+class UsersPublic(UsersBase):
+    user_id: UUID
+
+
+class UsersPublicWithOrgs(UsersPublic):
+    orgs: list["OrganisationsPublic"] = []  # noqa: F821
+
+
 class UsersList(SQLModel):
-    users: list[Users] = Field(description="List of Users objects")
+    users: list[UsersPublic] = Field(description="List of Users objects")
 
     @computed_field
     @property
