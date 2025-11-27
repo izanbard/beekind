@@ -1,13 +1,17 @@
 from contextlib import asynccontextmanager
 from io import StringIO
 from typing import AsyncIterator
+from uuid import UUID
 
-from fastapi import FastAPI, Response, Request, status
+from fastapi import FastAPI, Response, Request, status, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy import delete
+from sqlmodel import Session
 from yaml import dump as yaml_dump
 
-from src.backend.helpers import get_logger, get_config
 from src.backend.auth import MSAuthAdapter
+from src.backend.helpers import get_logger, get_config
+from src.backend.models import get_session, Users, Organisations, Contacts, UserToOrgLink, Apiary
 from src.backend.routers import ResourceRouter
 
 
@@ -53,6 +57,47 @@ def create_api() -> FastAPI:
         spec_str = StringIO()
         yaml_dump(app.openapi(), spec_str, sort_keys=False)
         return Response(spec_str.getvalue(), media_type="text/yaml")
+
+    @app.get("/populate", status_code=status.HTTP_201_CREATED, response_model=None, include_in_schema=False)
+    async def populate(session: Session = Depends(get_session)) -> None:
+        session.exec(delete(Users))
+        session.exec(delete(Organisations))
+        session.exec(delete(Contacts))
+        session.exec(delete(UserToOrgLink))
+        session.exec(delete(Apiary))
+        session.commit()
+        session.begin()
+        user = Users(
+            user_id=UUID("12345678-1234-1234-1234-123456789012"),
+            username="Christopher Robin",
+        )
+        session.add(user)
+        org = Organisations(
+            org_id=UUID("12345678-1234-1234-1234-123456789012"),
+            org_name="100 Aker Wood",
+        )
+        org.users.append(user)
+        session.add(org)
+        contact = Contacts(
+            contact_id=UUID("12345678-1234-1234-1234-123456789012"),
+            name="Winnie the Pooh",
+            phone="+4411234567890",
+            email="winnie@hundredaker.com",
+            address="Pooh Corner, High St Hartfield, East Sussex, TN7 4AE",
+            contact_notes="Only call late in the morning after Winne has had time to wake up. Piglet or tigger may answer.",
+        )
+        session.add(contact)
+        apiary = Apiary(
+            apiary_id=UUID("12345678-1234-1234-1234-123456789012"),
+            site_lat=51.87419,
+            site_lon=-1.18561,
+            name="Pooh Corner",
+            apiary_notes="Watch out for the large tree in the middle",
+        )
+        apiary.contact = contact
+        apiary.organisation = org
+        session.add(apiary)
+        session.commit()
 
     app.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)
     app_logger.info("App created")

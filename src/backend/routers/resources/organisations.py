@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 from uuid import UUID
 
@@ -14,6 +13,7 @@ from src.backend.models import (
     OrganisationsPublic,
     OrganisationsCreate,
     OrganisationsPublicWithUsers,
+    OrganisationsPublicWithUsersAndApiaries,
 )
 
 OrgRouter = APIRouter(
@@ -40,12 +40,12 @@ async def get_organisations_list(
 @OrgRouter.get(
     "/{org_id}",
     status_code=status.HTTP_200_OK,
-    response_model=OrganisationsPublicWithUsers | None,
+    response_model=OrganisationsPublicWithUsersAndApiaries | None,
     summary="Get a specific org",
     description="Get a specific org",
 )
 async def get_organisation_by_id(
-    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example=str(uuid.uuid4()))],
+    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ) -> type[Organisations | None]:
     org = db.get(Organisations, org_id)
@@ -74,7 +74,7 @@ async def create_new_organisation(
 
 @OrgRouter.delete("/{org_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete an org", description="Delete an org")
 async def delete_organisation_by_id(
-    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example=str(uuid.uuid4()))],
+    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ) -> None:
     with db.begin():
@@ -93,8 +93,8 @@ async def delete_organisation_by_id(
     description="Add a user to an org",
 )
 async def add_user_to_org(
-    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example=str(uuid.uuid4()))],
-    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example=str(uuid.uuid4()))],
+    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example="12345678-1234-1234-1234-123456789012")],
+    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ) -> type[Organisations]:
     with db.begin():

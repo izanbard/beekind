@@ -4,23 +4,28 @@ from fastapi.params import Depends
 from sqlalchemy import Engine
 from sqlmodel import create_engine, SQLModel, Session
 
-
 from src.backend.helpers import Config, get_config
+from .apiaries import Apiary, ApiaryList, ApiaryCreate, ApiaryPublic, ApiaryPublicWithContact  # noqa: F401
 
 # from local files
-from .contacts import Contacts, ContactsList, ContactsCreate, ContactsPublic  # noqa: F401
+from .contacts import Contacts, ContactsList, ContactsCreate, ContactsPublic, ContactsPublicWithApiaries  # noqa: F401
 from .organisations import (  # noqa: F401
-    Organisations,  # noqa: F401
-    OrganisationsList,  # noqa: F401
-    OrganisationsPublic,  # noqa: F401
-    OrganisationsCreate,  # noqa: F401
-    OrganisationsPublicWithUsers,  # noqa: F401
-)  # noqa: F401
-from .users import Users, UsersList, UsersCreate, UsersPublic, UsersPublicWithOrgs  # noqa: F401
+    Organisations,
+    OrganisationsList,
+    OrganisationsPublic,
+    OrganisationsCreate,
+    OrganisationsPublicWithUsers,
+    OrganisationsPublicWithApiaries,
+    OrganisationsPublicWithUsersAndApiaries,
+)
 from .user_to_org_link import UserToOrgLink  # noqa: F401
+from .users import Users, UsersList, UsersCreate, UsersPublic, UsersPublicWithOrgs  # noqa: F401
 
 engine = None
 OrganisationsPublicWithUsers.model_rebuild()
+OrganisationsPublicWithApiaries.model_rebuild()
+OrganisationsPublicWithUsersAndApiaries.model_rebuild()
+ContactsPublicWithApiaries.model_rebuild()
 UsersPublicWithOrgs.model_rebuild()
 
 

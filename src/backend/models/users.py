@@ -12,7 +12,7 @@ class UsersBase(SQLModel):
     username: str = Field(
         ...,
         description="Display name of User",
-        schema_extra={"examples": ["Peter Robinson"]},
+        schema_extra={"examples": ["Christopher Robin"]},
     )
 
 
@@ -21,7 +21,7 @@ class Users(UsersBase, table=True):
     user_id: UUID = Field(
         default_factory=uuid4,
         description="Internal ID of User",
-        schema_extra={"examples": [uuid4().hex]},
+        schema_extra={"examples": ["12345678-1234-1234-1234-123456789012"]},
         primary_key=True,
     )
 
@@ -33,7 +33,11 @@ class UsersCreate(UsersBase):
 
 
 class UsersPublic(UsersBase):
-    user_id: UUID
+    user_id: UUID = Field(
+        ...,
+        description="Internal ID of User",
+        schema_extra={"examples": ["12345678-1234-1234-1234-123456789012"]},
+    )
 
 
 class UsersPublicWithOrgs(UsersPublic):

@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 from uuid import UUID
 
@@ -35,7 +34,7 @@ async def get_users_list(db: Annotated[Session, Depends(get_session)]) -> UsersL
     description="Get a specific user",
 )
 async def get_user_by_id(
-    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example=str(uuid.uuid4()))],
+    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ) -> type[Users | None]:
     user = db.get(Users, user_id)
@@ -64,7 +63,7 @@ async def create_new_user(
 
 @UserRouter.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a user", description="Delete a user")
 async def delete_user_by_id(
-    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example=str(uuid.uuid4()))],
+    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ) -> None:
     with db.begin():
@@ -83,8 +82,8 @@ async def delete_user_by_id(
     description="Add a user to an org",
 )
 async def add_user_to_org(
-    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example=str(uuid.uuid4()))],
-    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example=str(uuid.uuid4()))],
+    user_id: Annotated[UUID, Path(..., description="Internal ID of a user", example="12345678-1234-1234-1234-123456789012")],
+    org_id: Annotated[UUID, Path(..., description="Internal ID of a org", example="12345678-1234-1234-1234-123456789012")],
     db: Annotated[Session, Depends(get_session)],
 ):
     with db.begin():
