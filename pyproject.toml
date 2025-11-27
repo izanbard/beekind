@@ -2,17 +2,17 @@
 name = "pacific_crest_trail"
 version = "0.0.1"
 dependencies = [
-    "fastapi>=0.111.0",
-    "fastapi-utilities>=0.2.0",
-    "uvicorn>=0.29.0",
-    "sqlmodel>=0.0.24",
-    "pyjwt>=2.8.0",
-    "pydantic>=2.12.4",
-    "pydantic-settings>=2.12.0",
     "cryptography>=46.0.3",
+    "fastapi>=0.122.0",
+    "fastapi-utilities>=0.3.1",
+    "httptools>=0.7.1",
     "httpx>=0.28.1",
-    "uvloop",
-    "httptools"
+    "pyjwt>=2.10.1",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "sqlmodel>=0.0.27",
+    "uvicorn>=0.29.0",
+    "uvloop>=0.22.1",
 ]
 requires-python = ">=3.12"
 readme = ".github/README.md"
@@ -21,10 +21,10 @@ license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
-    "black>=23.9.1",
-    "flake8>=6.1.0",
-    "pip-tools>=7.3.0",
-    "pre-commit>=3.4.0",
+    "black>=23.12.1",
+    "flake8>=7.3.0",
+    "pip-tools>=7.5.2",
+    "pre-commit>=4.5.0",
 ]
 
 [tool.black]
