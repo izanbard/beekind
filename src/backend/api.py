@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from io import StringIO
-from typing import AsyncIterator
+from typing import AsyncIterator, Annotated
 from uuid import UUID
 
 from fastapi import FastAPI, Response, Request, status, Depends
@@ -34,6 +34,7 @@ def create_api() -> FastAPI:
         {"name": "Contacts", "description": "CRUD operations for the base contact entities", "parent": "Resources"},
         {"name": "Users", "description": "CRUD operations for the base user entities", "parent": "Resources"},
         {"name": "Organisations", "description": "CRUD operations for the base org entities", "parent": "Resources"},
+        {"name": "Apiaries", "description": "CRUD operations for the base apiary entities", "parent": "Resources"},
     ]
     app_logger.info(f"Creating the app... version: {version}")
     app = FastAPI(
@@ -59,7 +60,7 @@ def create_api() -> FastAPI:
         return Response(spec_str.getvalue(), media_type="text/yaml")
 
     @app.get("/populate", status_code=status.HTTP_201_CREATED, response_model=None, include_in_schema=False)
-    async def populate(session: Session = Depends(get_session)) -> None:
+    async def populate(session: Annotated[Session, Depends(get_session)]) -> None:
         session.exec(delete(Users))
         session.exec(delete(Organisations))
         session.exec(delete(Contacts))
@@ -98,6 +99,7 @@ def create_api() -> FastAPI:
         apiary.organisation = org
         session.add(apiary)
         session.commit()
+        return None
 
     app.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)
     app_logger.info("App created")

@@ -5,7 +5,6 @@ from sqlalchemy import Engine
 from sqlmodel import create_engine, SQLModel, Session
 
 from src.backend.helpers import Config, get_config
-from .apiaries import Apiary, ApiaryList, ApiaryCreate, ApiaryPublic, ApiaryPublicWithContact  # noqa: F401
 
 # from local files
 from .contacts import Contacts, ContactsList, ContactsCreate, ContactsPublic, ContactsPublicWithApiaries  # noqa: F401
@@ -19,7 +18,9 @@ from .organisations import (  # noqa: F401
     OrganisationsPublicWithUsersAndApiaries,
 )
 from .user_to_org_link import UserToOrgLink  # noqa: F401
+
 from .users import Users, UsersList, UsersCreate, UsersPublic, UsersPublicWithOrgs  # noqa: F401
+from .apiaries import Apiary, ApiaryList, ApiaryCreate, ApiaryPublic, ApiaryPublicWithContact  # noqa: F401
 
 engine = None
 OrganisationsPublicWithUsers.model_rebuild()

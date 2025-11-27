@@ -9,10 +9,32 @@ from . import Organisations, Contacts
 
 
 class ApiaryBase(SQLModel):
-    org_id: UUID | None = Field(default=None, description="Organization ID", foreign_key="organisations.org_id")
-    contact_id: UUID | None = Field(default=None, description="Contact ID", foreign_key="contacts.contact_id")
-    site_lat: Decimal = Field(default=0, max_digits=9, decimal_places=7, description="Site latitude")
-    site_lon: Decimal = Field(default=0, max_digits=10, decimal_places=7, description="Site longitude")
+    org_id: UUID | None = Field(
+        default=None,
+        description="Organization ID",
+        schema_extra={"examples": ["12345678-1234-1234-1234-123456789012"]},
+        foreign_key="organisations.org_id",
+    )
+    contact_id: UUID | None = Field(
+        default=None,
+        description="Contact ID",
+        schema_extra={"examples": ["12345678-1234-1234-1234-123456789012"]},
+        foreign_key="contacts.contact_id",
+    )
+    site_lat: Decimal = Field(
+        default=0,
+        max_digits=9,
+        decimal_places=7,
+        description="Site latitude",
+        schema_extra={"examples": [51.8741900]},
+    )
+    site_lon: Decimal = Field(
+        default=0,
+        max_digits=10,
+        decimal_places=7,
+        description="Site longitude",
+        schema_extra={"examples": [-1.1856100]},
+    )
     name: str = Field(
         ...,
         description="Name of the Apiary",
@@ -53,10 +75,10 @@ class ApiaryPublicWithContact(ApiaryPublic):
     contact: type["ContactsPublic"] | None = None  # noqa: F821
 
 
-class ApiaryList(ApiaryBase):
+class ApiaryList(SQLModel):
     apiaries: list[ApiaryPublic] = Field(description="List of Apiary objects")
 
     @computed_field
     @property
     def count(self) -> Annotated[int, Field(description="Number of apiaries", schema_extra={"examples": [1]})]:
-        return len(self.contacts)
+        return len(self.apiaries)
