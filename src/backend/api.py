@@ -5,21 +5,20 @@ from uuid import UUID
 
 from fastapi import FastAPI, Response, Request, status, Depends
 from fastapi.responses import JSONResponse
+from keycloak import KeycloakOpenID
 from sqlalchemy import delete
 from sqlmodel import Session
 from yaml import dump as yaml_dump
 
-from src.backend.auth import MSAuthAdapter
-from src.backend.helpers import get_logger, get_config
-from src.backend.models import get_session, Users, Organisations, Contacts, UserToOrgLink, Apiary
+from src.backend.auth import AuthHelper
+from src.backend.helpers import get_logger
+from src.backend.models import get_session, Users, Organisations, Contacts, UserToOrgLink, Apiary, Token, Credentials
 from src.backend.routers import ResourceRouter
 
 
 @asynccontextmanager
 async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]:
     # before app is created
-    config = get_config()
-    MSAuthAdapter(config.frontend_client_id, config.tenant_id, config.auth_policy, config.auth_url)
     # yield to the app
     yield
     # after the app shuts down
@@ -35,6 +34,7 @@ def create_api() -> FastAPI:
         {"name": "Users", "description": "CRUD operations for the base user entities", "parent": "Resources"},
         {"name": "Organisations", "description": "CRUD operations for the base org entities", "parent": "Resources"},
         {"name": "Apiaries", "description": "CRUD operations for the base apiary entities", "parent": "Resources"},
+        {"name": "Admin", "description": "Administrative tools for the API"},
     ]
     app_logger.info(f"Creating the app... version: {version}")
     app = FastAPI(
@@ -100,6 +100,27 @@ def create_api() -> FastAPI:
         session.add(apiary)
         session.commit()
         return None
+
+    @app.post(
+        "/gettoken",
+        status_code=status.HTTP_200_OK,
+        response_model=Token,
+        tags=["Admin"],
+        summary="Get a JWT token",
+        description="an end point for getting a JWT token",
+    )
+    async def gettoken(
+        credentials: Credentials,
+        kc_client: Annotated[KeycloakOpenID, Depends(AuthHelper.get_keycloak_client)],
+    ) -> Token:
+        token = kc_client.token(username=credentials.username, password=credentials.password)
+        return Token(
+            token_type=token["token_type"],
+            access_token=token["access_token"],
+            expires_in=token["expires_in"],
+            refresh_expires_in=token["refresh_expires_in"],
+            refresh_token=token["refresh_token"],
+        )
 
     app.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)
     app_logger.info("App created")

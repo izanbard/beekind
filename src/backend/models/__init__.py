@@ -21,6 +21,7 @@ from .user_to_org_link import UserToOrgLink  # noqa: F401
 
 from .users import Users, UsersList, UsersCreate, UsersPublic, UsersPublicWithOrgs  # noqa: F401
 from .apiaries import Apiary, ApiaryList, ApiaryCreate, ApiaryPublic, ApiaryPublicWithContact  # noqa: F401
+from .admin import Token, Credentials  # noqa: F401
 
 engine = None
 OrganisationsPublicWithUsers.model_rebuild()
